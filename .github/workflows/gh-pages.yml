@@ -36,6 +36,8 @@ jobs:
         run: |
           poetry install
           poetry run peachee_dashboard --output-dir ./_site
+        env:
+          CIRRUS_COOKIE_HEADER: ${{ secrets.CIRRUS_COOKIE_HEADER }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
