@@ -57,7 +57,7 @@ def main(args: List[str] = None):
     parser.add_argument("--repository", type=str, default="peachee-cfamily", help="Repository name")
     parser.add_argument("--branch", type=str, default="cirrusci", help="Branch name")
     parser.add_argument("--query-limit", type=int, default=30, help="GraphQL Query limit")
-    parser.add_argument("--limit", type=int, default=10, help="Number of builds to list")
+    parser.add_argument("--limit", type=int, default=20, help="Number of builds to list")
     parser.add_argument("--pattern", type=str, default="Cron", help="Job name pattern")
     parser.add_argument("--output-dir", type=Path, default="/tmp/peachee_dashboard")
     opts = parser.parse_args(args=args)
