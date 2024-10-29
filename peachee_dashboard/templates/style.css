@@ -1,0 +1,47 @@
+td.completed {
+    background-color: forestgreen;
+}
+
+td.failed {
+    background-color: crimson;
+}
+
+th.date {
+    height: 6em;
+    white-space: nowrap;
+}
+
+th.date>div {
+    transform: translate(20px, 0px) rotate(-45deg);
+    width: 1.5em;
+}
+
+table.cirrus-matrix th {
+    border: none;
+}
+
+th.date>div>span {
+    border-bottom: 1px solid #ccc;
+    padding: 5px 10px;
+}
+
+table.cirrus-matrix td.state {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+table.cirrus-matrix {
+    max-width: fit-content;
+}
+
+td.state a {
+    color: white;
+}
+
+td.state i {
+    visibility: hidden;
+}
+
+td.state:hover i {
+    visibility: visible;
+}

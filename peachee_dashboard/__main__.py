@@ -2,9 +2,11 @@ import logging
 import re
 from argparse import ArgumentParser
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 import coloredlogs
+from jinja2 import Environment, PackageLoader
 
 from peachee_dashboard.cirrusci import CirrusCIClient
 
@@ -21,27 +23,26 @@ def get_filtered_builds(client: CirrusCIClient, repository: str, branch: str, qu
 
 
 def get_task_matrix(client: CirrusCIClient, builds: List[Dict]) -> Tuple[Dict, List[datetime]]:
-    projects = None
+    projects = set()
     dates = []
+    table = []
 
     for build in builds:
         logger.info("Querying %s", build["id"])
         tasks = client.get_tasks(build["id"])
 
-        if not projects:
-            projects = {task["name"]: [] for task in tasks}
-
         dates.append(datetime.fromtimestamp(build["buildCreatedTimestamp"] / 1e3))
 
-        missing = set(projects.keys())
+        row = {}
         for task in tasks:
-            projects[task["name"]].append(task)
-            missing.remove(task["name"])
+            projects.add(task["name"])
+            row[task["name"]] = task
 
-        for m in missing:
-            projects[m] = {"status": "UNDEFINED"}
+        table.append(row)
 
-    return projects, dates
+    projects = list(projects)
+    projects.sort(key=lambda p: p.lower())
+    return projects, list(zip(dates, table))
 
 
 def main(args: List[str] = None):
@@ -55,8 +56,10 @@ def main(args: List[str] = None):
     )
     parser.add_argument("--repository", type=str, default="peachee-cfamily", help="Repository name")
     parser.add_argument("--branch", type=str, default="cirrusci", help="Branch name")
-    parser.add_argument("--query-limit", type=int, default=5, help="GraphQL Query limit")
+    parser.add_argument("--query-limit", type=int, default=30, help="GraphQL Query limit")
+    parser.add_argument("--limit", type=int, default=10, help="Number of builds to list")
     parser.add_argument("--pattern", type=str, default="Cron", help="Job name pattern")
+    parser.add_argument("--output-dir", type=Path, default="/tmp/peachee_dashboard")
     opts = parser.parse_args(args=args)
 
     coloredlogs.install(
@@ -66,5 +69,23 @@ def main(args: List[str] = None):
     )
 
     client = CirrusCIClient(opts.cirrus_api)
-    builds = get_filtered_builds(client, opts.repository, opts.branch, opts.query_limit, opts.pattern)
-    projects, dates = get_task_matrix(client, builds)
+    builds = get_filtered_builds(client, opts.repository, opts.branch, opts.query_limit, opts.pattern)[: opts.limit]
+    projects, matrix = get_task_matrix(client, builds)
+
+    logger.info("Got %d entries", len(matrix))
+
+    loader = PackageLoader("peachee_dashboard")
+    env = Environment(loader=loader, autoescape=True)
+
+    logger.info("Generating index.html")
+    index_template = env.get_template("index.jinja")
+    opts.output_dir.mkdir(exist_ok=True)
+    with open(opts.output_dir / "index.html", "w") as fd:
+        fd.write(index_template.render(projects=projects, matrix=matrix))
+
+    p = Path(__file__).parent / "templates"
+    for t in (t for t in p.iterdir() if t.is_file() and t.suffix != ".jinja"):
+        target = opts.output_dir / t.name
+        if not target.exists():
+            logger.info("Symlink %s", t)
+            target.symlink_to(t)
