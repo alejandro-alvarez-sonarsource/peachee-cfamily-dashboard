@@ -6,32 +6,47 @@ td.failed {
     background-color: crimson;
 }
 
-th.date {
-    height: 6em;
-    white-space: nowrap;
+td.executing {
+    background-color: cornflowerblue;
 }
 
-th.date>div {
-    transform: translate(20px, 0px) rotate(-45deg);
-    width: 1.5em;
-}
-
-table.cirrus-matrix th {
+thead tr {
     border: none;
 }
 
-th.date>div>span {
-    border-bottom: 1px solid #ccc;
-    padding: 5px 10px;
+tr.health-date {
+    text-align: right;
+    opacity: 0.8;
+    border-top: none;
 }
 
-table.cirrus-matrix td.state {
-    width: 1.5em;
-    height: 1.5em;
+tr.health-date :first-child {
+    border: none;
 }
 
-table.cirrus-matrix {
-    max-width: fit-content;
+tr.health-date td span::after {
+    content: " %";
+}
+
+tr.health-date td.health-project {
+    text-align: center;
+    border-left: none;
+}
+
+td.health-project {
+    text-align: right;
+    width: 4em;
+    opacity: 0.8;
+}
+
+td.health-project span::after {
+    content: " %";
+}
+
+td.state {
+    text-align: center;
+    margin: 0;
+    width: 4em;
 }
 
 td.state a {
@@ -44,4 +59,75 @@ td.state i {
 
 td.state:hover i {
     visibility: visible;
+}
+
+th.date {
+    height: 6em;
+    white-space: nowrap;
+}
+
+th.date>div {
+    height: 110px;
+    position: relative;
+}
+
+th.date>div>span {
+    position: absolute;
+    transform: rotate(-45deg);
+    transform-origin: center left;
+    white-space: nowrap;
+    bottom: 5px;
+    left: 50%;
+}
+
+table.cirrus-matrix th {
+    border: none;
+}
+
+table.cirrus-matrix {
+    max-width: fit-content;
+}
+
+td.health-10 {
+    background-color: #228b22;
+}
+
+td.health-9 {
+    background-color: #449a1c;
+}
+
+td.health-8 {
+    background-color: #66a916;
+}
+
+td.health-7 {
+    background-color: #8bb90f;
+}
+
+td.health-6 {
+    background-color: #b0c908;
+}
+
+td.health-5 {
+    background-color: #dddd00;
+}
+
+td.health-4 {
+    background-color: #ddad0e;
+}
+
+td.health-3 {
+    background-color: #dd8919;
+}
+
+td.health-2 {
+    background-color: #dd6923;
+}
+
+td.health-1 {
+    background-color: #dd452e;
+}
+
+td.health-0 {
+    background-color: #dc143c;
 }
