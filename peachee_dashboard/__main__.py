@@ -62,7 +62,7 @@ def asset_copy(src: Path, dst: Path):
 
 def main(args: List[str] = None):
     parser = ArgumentParser()
-    parser.add_argument("--log-level", default="INFO")
+    parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     parser.add_argument(
         "--cirrus-api",
         type=str,
