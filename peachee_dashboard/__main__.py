@@ -60,6 +60,15 @@ def asset_copy(src: Path, dst: Path):
     shutil.copy(src, dst)
 
 
+def copy_assets(output_dir: Path, symlink: bool):
+    asset_action = asset_symlink if symlink else asset_copy
+
+    p = Path(__file__).parent / "templates"
+    for source in (t for t in p.iterdir() if t.is_file() and t.suffix != ".jinja"):
+        target = output_dir / source.name
+        asset_action(source, target)
+
+
 def main(args: List[str] = None):
     parser = ArgumentParser()
     parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
@@ -104,9 +113,4 @@ def main(args: List[str] = None):
     with open(opts.output_dir / "index.html", "w") as fd:
         fd.write(index_template.render(projects=projects, matrix=matrix))
 
-    asset_action = asset_symlink if opts.symlink_assets else asset_copy
-
-    p = Path(__file__).parent / "templates"
-    for source in (t for t in p.iterdir() if t.is_file() and t.suffix != ".jinja"):
-        target = opts.output_dir / source.name
-        asset_action(source, target)
+    copy_assets(opts.output_dir, opts.symlink_assets)
