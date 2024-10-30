@@ -1,5 +1,6 @@
 import logging
 import re
+import shutil
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
@@ -45,6 +46,20 @@ def get_task_matrix(client: CirrusCIClient, builds: List[Dict]) -> Tuple[Dict, L
     return projects, list(zip(dates, table))
 
 
+def asset_symlink(src: Path, dst: Path):
+    if dst.exists():
+        dst.unlink()
+    logger.info("Symlink %s => %s", src, dst)
+    dst.symlink_to(src)
+
+
+def asset_copy(src: Path, dst: Path):
+    if dst.exists():
+        dst.unlink()
+    logger.info("Copy %s => %s", src, dst)
+    shutil.copy(src, dst)
+
+
 def main(args: List[str] = None):
     parser = ArgumentParser()
     parser.add_argument("--log-level", default="INFO")
@@ -60,6 +75,12 @@ def main(args: List[str] = None):
     parser.add_argument("--limit", type=int, default=20, help="Number of builds to list")
     parser.add_argument("--pattern", type=str, default="Cron", help="Job name pattern")
     parser.add_argument("--output-dir", type=Path, default="/tmp/peachee_dashboard")
+    parser.add_argument(
+        "--symlink-assets",
+        default=False,
+        action="store_true",
+        help="Symlink instead of copying assets to the output directory",
+    )
     opts = parser.parse_args(args=args)
 
     coloredlogs.install(
@@ -83,9 +104,9 @@ def main(args: List[str] = None):
     with open(opts.output_dir / "index.html", "w") as fd:
         fd.write(index_template.render(projects=projects, matrix=matrix))
 
+    asset_action = asset_symlink if opts.symlink_assets else asset_copy
+
     p = Path(__file__).parent / "templates"
-    for t in (t for t in p.iterdir() if t.is_file() and t.suffix != ".jinja"):
-        target = opts.output_dir / t.name
-        if not target.exists():
-            logger.info("Symlink %s", t)
-            target.symlink_to(t)
+    for source in (t for t in p.iterdir() if t.is_file() and t.suffix != ".jinja"):
+        target = opts.output_dir / source.name
+        asset_action(source, target)
