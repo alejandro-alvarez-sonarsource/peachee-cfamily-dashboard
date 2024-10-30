@@ -4,12 +4,13 @@ import shutil
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import coloredlogs
 from jinja2 import Environment, PackageLoader
 
 from peachee_dashboard.cirrusci import CirrusCIClient
+from peachee_dashboard.dashboard import Dashboard
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ def get_filtered_builds(client: CirrusCIClient, repository: str, branch: str, qu
     return builds
 
 
-def get_task_matrix(client: CirrusCIClient, builds: List[Dict]) -> Tuple[Dict, List[datetime]]:
+def get_task_matrix(client: CirrusCIClient, builds: List[Dict]) -> Dashboard:
     projects = set()
     dates = []
     table = []
@@ -43,7 +44,7 @@ def get_task_matrix(client: CirrusCIClient, builds: List[Dict]) -> Tuple[Dict, L
 
     projects = list(projects)
     projects.sort(key=lambda p: p.lower())
-    return projects, list(zip(dates, table))
+    return Dashboard(projects, dates, table)
 
 
 def asset_symlink(src: Path, dst: Path):
@@ -100,17 +101,18 @@ def main(args: List[str] = None):
 
     client = CirrusCIClient(opts.cirrus_api)
     builds = get_filtered_builds(client, opts.repository, opts.branch, opts.query_limit, opts.pattern)[: opts.limit]
-    projects, matrix = get_task_matrix(client, builds)
+    dashboard = get_task_matrix(client, builds)
 
-    logger.info("Got %d entries", len(matrix))
+    logger.info("Got %d entries", len(dashboard))
 
     loader = PackageLoader("peachee_dashboard")
     env = Environment(loader=loader, autoescape=True)
+    env.globals["zip"] = zip
 
     logger.info("Generating index.html")
     index_template = env.get_template("index.jinja")
     opts.output_dir.mkdir(exist_ok=True)
     with open(opts.output_dir / "index.html", "w") as fd:
-        fd.write(index_template.render(projects=projects, matrix=matrix))
+        fd.write(index_template.render(dashboard=dashboard))
 
     copy_assets(opts.output_dir, opts.symlink_assets)

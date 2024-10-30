@@ -18,21 +18,21 @@
             <thead>
                 <tr>
                     <th></th>
-                    {% for row in matrix %}
+                    {% for date in dashboard.dates %}
                     <th class="state date">
-                        <div><span>{{ row[0].strftime('%Y-%m-%d') }}</span></div>
+                        <div><span>{{ date.strftime('%Y-%m-%d') }}</span></div>
                     </th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for project in projects %}
+                {% for project in dashboard.projects %}
                 <tr>
                     <td>{{ project }}</td>
-                    {% for row in matrix %}
-                    {% set task = row[1][project] %}
+                    {% for date, row in zip(dashboard.dates, dashboard.table) %}
+                    {% set task = row[project] %}
                     <td class="state {{ task.get('status', 'undefined').lower() }}"
-                        title="{{row[0].strftime('%Y-%m-%d')}}">
+                        title="{{date.strftime('%Y-%m-%d')}}">
                         <a href="https://cirrus-ci.com/task/{{task.get('id','')}}" target="_blank">
                             <i class="bi bi-search"></i>
                         </a>
