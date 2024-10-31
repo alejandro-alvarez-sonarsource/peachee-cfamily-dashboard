@@ -23,7 +23,7 @@ class CirrusCIClient:
             raise ValueError("CIRRUS_API_TOKEN or CIRRUS_COOKIE_HEADER must be set on the environment")
 
         transport = AIOHTTPTransport(url=endpoint, cookies=cookies, headers=headers)
-        self.client = Client(transport=transport, fetch_schema_from_transport=True)
+        self.client = Client(transport=transport, fetch_schema_from_transport=True, execute_timeout=60)
 
         # Verify connectivity
         query = gql(
@@ -115,19 +115,13 @@ class CirrusCIClient:
                 notifications {
                     message
                 }
-                firstFailedCommand {
-                    name
-                    status
-                    durationInSeconds
-                    logsTail
-                }
                 }
             """
         )
         result = self.client.execute(query, variable_values={"buildId": build_id})
         return result["build"]["latestGroupTasks"]
 
-    def get_steps(self, task_id: str) -> List[Dict]:
+    def get_failure_reason(self, task_id: str) -> List[Dict]:
         query = gql(
             """
                 query TaskQuery(
@@ -139,13 +133,20 @@ class CirrusCIClient:
                 }
 
                 fragment TaskDetails on Task {
-                commands {
+                notifications {
+                    message
+                }
+                firstFailedCommand {
                     name
-                    durationInSeconds
                     status
+                    durationInSeconds
+                    logsTail
                 }
                 }
             """
         )
-        result = self.client.execute(query, variable_values={"taskId": task_id})
-        return result["task"]["commands"]
+        result = self.client.execute(
+            query,
+            variable_values={"taskId": task_id},
+        )
+        return result["task"]

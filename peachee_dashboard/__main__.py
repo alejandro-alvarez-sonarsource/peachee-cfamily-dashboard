@@ -30,7 +30,7 @@ def get_task_matrix(client: CirrusCIClient, builds: List[Dict]) -> Dashboard:
     table = []
 
     for build in builds:
-        logger.info("Querying %s", build["id"])
+        logger.info("Querying build %s", build["id"])
         tasks = client.get_tasks(build["id"])
 
         dates.append(datetime.fromtimestamp(build["buildCreatedTimestamp"] / 1e3))
@@ -39,6 +39,9 @@ def get_task_matrix(client: CirrusCIClient, builds: List[Dict]) -> Dashboard:
         for task in tasks:
             projects.add(task["name"])
             row[task["name"]] = task
+            if task["status"] in ("FAILED", "ABORTED"):
+                logger.info("Querying failure reasons for task %s", task["id"])
+                task.update(client.get_failure_reason(task["id"]))
 
         table.append(row)
 
@@ -133,18 +136,21 @@ TASK_ICON_MAP = {
 
 
 def status_icon(task: Dict) -> str:
-    if ffc := task["firstFailedCommand"]:
+    if ffc := task.get("firstFailedCommand", None):
         return TASK_ICON_MAP.get(ffc["name"], "bi-list-task")
+    elif notifications := task.get("notifications", None):
+        if notifications and notifications[-1]["message"] == "CI agent stopped responding!":
+            return "bi-lightbulb-off"
     return "bi-search"
 
 
 def status_title(task: Dict) -> str:
     extra = ""
-    if task["notifications"]:
+    if task.get("notifications", None):
         extra = task["notifications"][-1]["message"]
 
-    if ffc := task["firstFailedCommand"]:
-        log_tail = ffc["logsTail"][-1].strip()
+    if ffc := task.get("firstFailedCommand", None):
+        log_tail = ffc["logsTail"][-1] if ffc["logsTail"] else ""
         if log_tail in ("Context canceled!", "Timed out!"):
             extra = log_tail
         return f"{ffc['name']} {ffc['status']} {extra}"
