@@ -1,17 +1,65 @@
+/* 
+ * Health colors based on https://developer.apple.com/design/human-interface-guidelines/color#system-colors
+ * Table colors based on GitHub colors
+ */
+
+html {
+    --completed-color: #7ce387;
+    --failed-color: #fa7970;
+    --executing-color: #77bdfb;
+    --triggered-color: #a2d2fb;
+
+    --color-health-0: rgb(255, 59, 48);
+    --color-health-1: #ea543c;
+    --color-health-2: #de5c3d;
+    --color-health-3: #ce683e;
+    --color-health-4: #c3703f;
+    --color-health-5: rgb(255, 204, 0);
+    --color-health-6: #9b8d42;
+    --color-health-7: #70ab46;
+    --color-health-8: #59bb48;
+    --color-health-9: #49c749;
+    --color-health-10: rgb(40, 205, 65);
+
+}
+
+html[data-bs-theme='dark'] {
+    --completed-color: #7ce387;
+    --failed-color: #fa7970;
+    --executing-color: #77bdfb;
+    --triggered-color: #a2d2fb;
+
+    --color-health-0: rgb(255, 69, 58);
+    --color-health-1: #ff5f31;
+    --color-health-2: #ff7f27;
+    --color-health-3: #ff991e;
+    --color-health-4: #ffb914;
+    --color-health-5: rgb(255, 214, 10);
+    --color-health-6: #d2d618;
+    --color-health-7: #99d62a;
+    --color-health-8: #6cd639;
+    --color-health-9: #5bd63e;
+    --color-health-10: rgb(50, 215, 75);
+}
+
+body {
+    padding-bottom: 5em;
+}
+
 td.completed {
-    background-color: forestgreen;
+    background-color: var(--completed-color);
 }
 
 td.failed {
-    background-color: crimson;
+    background-color: var(--failed-color);
 }
 
 td.executing {
-    background-color: cornflowerblue;
+    background-color: var(--executing-color);
 }
 
 td.triggered {
-    background-color: tan;
+    background-color: var(--triggered-color);
 }
 
 thead tr {
@@ -20,7 +68,6 @@ thead tr {
 
 tr.health-date {
     text-align: right;
-    opacity: 0.8;
     border-top: none;
 }
 
@@ -40,7 +87,6 @@ tr.health-date td.health-project {
 td.health-project {
     text-align: right;
     width: 4em;
-    opacity: 0.8;
 }
 
 td.health-project span::after {
@@ -93,54 +139,54 @@ table.cirrus-matrix {
 }
 
 td.health-10 {
-    background-color: #228b22;
+    background-color: var(--color-health-10);
 }
 
 td.health-9 {
-    background-color: #449a1c;
+    background-color: var(--color-health-9);
 }
 
 td.health-8 {
-    background-color: #66a916;
+    background-color: var(--color-health-8);
 }
 
 td.health-7 {
-    background-color: #8bb90f;
+    background-color: var(--color-health-7);
 }
 
 td.health-6 {
-    background-color: #b0c908;
+    background-color: var(--color-health-6);
 }
 
 td.health-5 {
-    background-color: #dddd00;
+    background-color: var(--color-health-5);
 }
 
 td.health-4 {
-    background-color: #ddad0e;
+    background-color: var(--color-health-4);
 }
 
 td.health-3 {
-    background-color: #dd8919;
+    background-color: var(--color-health-3);
 }
 
 td.health-2 {
-    background-color: #dd6923;
+    background-color: var(--color-health-2);
 }
 
 td.health-1 {
-    background-color: #dd452e;
+    background-color: var(--color-health-1);
 }
 
 td.health-0 {
-    background-color: #dc143c;
+    background-color: var(--color-health-0);
 }
 
 /* Footer */
 div.footer-container {
     position: fixed;
     bottom: 0;
-    background-color: white;
+    background-color: var(--bs-body-bg);
 }
 
 footer {
@@ -155,8 +201,4 @@ ul.legend {
 ul.legend li {
     display: inline-block;
     margin-left: 2em;
-}
-
-body {
-    padding-bottom: 5em;
 }
