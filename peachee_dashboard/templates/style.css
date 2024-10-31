@@ -10,6 +10,10 @@ td.executing {
     background-color: cornflowerblue;
 }
 
+td.triggered {
+    background-color: tan;
+}
+
 thead tr {
     border: none;
 }
@@ -53,7 +57,7 @@ td.state a {
     color: white;
 }
 
-td.state i {
+td.state.completed i {
     visibility: hidden;
 }
 
@@ -130,4 +134,29 @@ td.health-1 {
 
 td.health-0 {
     background-color: #dc143c;
+}
+
+/* Footer */
+div.footer-container {
+    position: fixed;
+    bottom: 0;
+    background-color: white;
+}
+
+footer {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 1em;
+}
+
+ul.legend {
+    list-style-type: none;
+}
+
+ul.legend li {
+    display: inline-block;
+    margin-left: 2em;
+}
+
+body {
+    padding-bottom: 5em;
 }

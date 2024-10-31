@@ -108,6 +108,8 @@ def main(args: List[str] = None):
     loader = PackageLoader("peachee_dashboard")
     env = Environment(loader=loader, autoescape=True)
     env.globals["zip"] = zip
+    env.globals["status_icon"] = status_icon
+    env.globals["status_title"] = status_title
 
     logger.info("Generating index.html")
     index_template = env.get_template("index.jinja")
@@ -116,3 +118,34 @@ def main(args: List[str] = None):
         fd.write(index_template.render(dashboard=dashboard))
 
     copy_assets(opts.output_dir, opts.symlink_assets)
+
+
+TASK_ICON_MAP = {
+    "checkout": "bi-git",
+    "build": "bi-gear-wide-connected",
+    "build2": "bi-gear-wide-connected",
+    "bwrapper_analyze": "bi-patch-check",
+    "external_compdb_analyze": "bi-patch-check",
+    "analyze2": "bi-patch-check",
+    "analyze_autoscan": "bi-robot",
+    "autoscan_result_test": "bi-robot",
+}
+
+
+def status_icon(task: Dict) -> str:
+    if ffc := task["firstFailedCommand"]:
+        return TASK_ICON_MAP.get(ffc["name"], "bi-list-task")
+    return "bi-search"
+
+
+def status_title(task: Dict) -> str:
+    extra = ""
+    if task["notifications"]:
+        extra = task["notifications"][-1]["message"]
+
+    if ffc := task["firstFailedCommand"]:
+        log_tail = ffc["logsTail"][-1].strip()
+        if log_tail in ("Context canceled!", "Timed out!"):
+            extra = log_tail
+        return f"{ffc['name']} {ffc['status']} {extra}"
+    return f"{task["status"]} {extra}"

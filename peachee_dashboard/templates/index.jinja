@@ -46,10 +46,10 @@
                     </td>
                     {% for date, row in zip(dashboard.dates, dashboard.table) %}
                     {% set task = row[project] %}
-                    <td class="state {{ task.get('status', 'undefined').lower() }}"
-                        title="{{date.strftime('%Y-%m-%d')}}">
+                    {% set task_status = task.get('status', 'undefined').lower() %}
+                    <td class="state {{ task_status }}" title="{{ status_title(task) }}">
                         <a href="https://cirrus-ci.com/task/{{task.get('id','')}}" target="_blank">
-                            <i class="bi bi-search"></i>
+                            <i class="bi {{ status_icon(task) }}"></i>
                         </a>
                     </td>
                     {% endfor %}
@@ -57,7 +57,20 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
+
+        <div class="container text-center footer-container">
+            <footer class="row">
+                <div class="col">
+                    <ul class="legend">
+                        <li><i class="bi bi-git"></i> Checkout</li>
+                        <li><i class="bi bi-gear-wide-connected"></i> Building</li>
+                        <li><i class="bi bi-patch-check"></i> Analysis</li>
+                        <li><i class="bi bi-robot"></i> AutoScan</li>
+                        <li><i class="bi bi-list-task"></i> Other</li>
+                    </ul>
+                </div>
+            </footer>
+        </div>
 </body>
 
 </html>

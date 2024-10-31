@@ -112,8 +112,40 @@ class CirrusCIClient:
                 scheduledTimestamp
                 finalStatusTimestamp
                 durationInSeconds
+                notifications {
+                    message
+                }
+                firstFailedCommand {
+                    name
+                    status
+                    durationInSeconds
+                    logsTail
+                }
                 }
             """
         )
         result = self.client.execute(query, variable_values={"buildId": build_id})
         return result["build"]["latestGroupTasks"]
+
+    def get_steps(self, task_id: str) -> List[Dict]:
+        query = gql(
+            """
+                query TaskQuery(
+                $taskId: ID!
+                ) {
+                task(id: $taskId) {
+                    ...TaskDetails
+                }
+                }
+
+                fragment TaskDetails on Task {
+                commands {
+                    name
+                    durationInSeconds
+                    status
+                }
+                }
+            """
+        )
+        result = self.client.execute(query, variable_values={"taskId": task_id})
+        return result["task"]["commands"]
