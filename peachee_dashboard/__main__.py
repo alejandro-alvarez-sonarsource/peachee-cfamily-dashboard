@@ -154,4 +154,4 @@ def status_title(task: Dict) -> str:
         if log_tail in ("Context canceled!", "Timed out!"):
             extra = log_tail
         return f"{ffc['name']} {ffc['status']} {extra}"
-    return f"{task["status"]} {extra}"
+    return f"{task['status']} {extra}"
